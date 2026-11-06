@@ -66,15 +66,6 @@ export function Hero(props: HeroProps) {
           </em>
         </h1>
 
-        <p
-          className='landing-animate-fade-up text-foreground/75 mt-5 max-w-[620px] text-[17px] leading-[1.75] opacity-0 sm:text-[19px]'
-          style={{ animationDelay: '120ms' }}
-        >
-          {t(
-            'Point your app at our base URL and call OpenAI, Claude, Gemini and more with one key. No subscription and no minimum. You pay only for the tokens you use.'
-          )}
-        </p>
-
         <div
           className='landing-animate-fade-up mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 opacity-0'
           style={{ animationDelay: '180ms' }}
@@ -88,7 +79,10 @@ export function Hero(props: HeroProps) {
               <ArrowRight className='ml-1.5 size-4 transition-transform duration-200 group-hover:translate-x-0.5' />
             </Button>
           ) : (
-            <Button className={PRIMARY_CTA_CLASS} render={<Link to='/sign-up' />}>
+            <Button
+              className={PRIMARY_CTA_CLASS}
+              render={<Link to='/sign-up' />}
+            >
               {t('Get your API key')}
               <ArrowRight className='ml-1.5 size-4 transition-transform duration-200 group-hover:translate-x-0.5' />
             </Button>

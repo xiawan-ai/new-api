@@ -43,7 +43,7 @@ export function HowItWorks() {
       num: '3',
       title: t('Point your app at the base URL'),
       desc: t(
-        'Paste the base URL and your key into Finch, Cherry Studio, or your own code. Then send your first request.'
+        'Paste the base URL and your key into Finch Agent or your own code. Then send your first request.'
       ),
       icon: <Plug className='size-5' strokeWidth={1.5} />,
     },
