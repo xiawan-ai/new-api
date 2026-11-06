@@ -23,61 +23,36 @@ For commercial licensing, please contact support@quantumnous.com
  * provider without breaking React Fast Refresh boundaries.
  */
 
+/**
+ * Color presets.
+ *
+ * This deployment ships one look, the Finch house style in styles/finch.css,
+ * so `default` is the only preset and the picker in the theme drawer hides
+ * itself. The preset axis (storage key, `data-theme-preset`, provider API) is
+ * kept so a preset can be added back by listing it here and giving it a
+ * `[data-theme-preset='…']` block in styles/theme-presets.css. A preset value
+ * saved by an older build is no longer in this list and falls back to
+ * `default`.
+ */
 export const THEME_PRESETS = [
   {
+    // Swatches preview paper → brand.
     value: 'default',
     name: 'Default',
-    swatches: ['oklch(0.72 0.18 250)', 'oklch(0.7 0.12 280)'],
-  },
-  {
-    // Inspired by Anthropic's official brand language: warm cream canvas
-    // (#faf9f5) paired with clay/coral (#d97757) as the single accent.
-    // Swatches preview the canvas → accent gradient that defines the system.
-    value: 'anthropic',
-    name: 'Anthropic',
-    swatches: ['oklch(0.984 0.005 95)', 'oklch(0.685 0.142 38)'],
-  },
-  {
-    value: 'simple-large',
-    name: 'Simple Large-font',
-    swatches: ['oklch(0.15 0 0)', 'oklch(0.99 0 0)'],
-  },
-  {
-    value: 'underground',
-    name: 'Underground',
-    swatches: ['oklch(0.5315 0.0694 156.19)', 'oklch(0.5748 0.0862 336.52)'],
-  },
-  {
-    value: 'rose-garden',
-    name: 'Rose Garden',
-    swatches: ['oklch(0.5827 0.2418 12.23)', 'oklch(0.8131 0.1129 5.67)'],
-  },
-  {
-    value: 'lake-view',
-    name: 'Lake View',
-    swatches: ['oklch(0.765 0.177 163.22)', 'oklch(0.551 0.0899 200.52)'],
-  },
-  {
-    value: 'sunset-glow',
-    name: 'Sunset Glow',
-    swatches: ['oklch(0.5591 0.1882 25.33)', 'oklch(0.7938 0.1248 42.42)'],
-  },
-  {
-    value: 'forest-whisper',
-    name: 'Forest Whisper',
-    swatches: ['oklch(0.5276 0.1072 182.22)', 'oklch(0.5236 0.0505 250.18)'],
-  },
-  {
-    value: 'ocean-breeze',
-    name: 'Ocean Breeze',
-    swatches: ['oklch(0.5461 0.2152 262.88)', 'oklch(0.5854 0.2041 277.12)'],
-  },
-  {
-    value: 'lavender-dream',
-    name: 'Lavender Dream',
-    swatches: ['oklch(0.5709 0.1808 306.89)', 'oklch(0.811 0.0589 201.14)'],
+    swatches: ['#f4f1e8', '#3f6b56'],
   },
 ] as const
+
+/**
+ * Light/dark mode lock.
+ *
+ * The Finch house style is one cream paper theme (styles/finch.css) with no
+ * dark counterpart, so the mode axis is pinned to light: stored and system
+ * preferences are ignored and the mode controls hide themselves. Set this to
+ * `null` to give users the System / Light / Dark choice back, and restore the
+ * preference lookup in the index.html boot script at the same time.
+ */
+export const LOCKED_THEME_MODE: 'light' | 'dark' | null = 'light'
 
 export type ThemePreset = (typeof THEME_PRESETS)[number]['value']
 export type ThemeRadius = 'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl'
@@ -87,8 +62,8 @@ export type ContentLayout = 'full' | 'centered'
 /**
  * Font axis for the theme.
  *
- * - `default` — use the browser's sans-serif unless the active preset
- *   specifies its own font (Anthropic uses serif).
+ * - `default` — the house typography: system sans body with serif headlines
+ *   (a preset may specify its own body font through `PRESET_DEFAULT_FONT`).
  * - `sans` — explicitly use Public Sans.
  * - `serif` — use Lora + CJK fallbacks. Monospace contexts keep their
  *   own family via Tailwind preflight and `.font-mono`.
@@ -154,14 +129,13 @@ export const CONTENT_LAYOUT_VALUES: ReadonlySet<ContentLayout> = new Set([
  * Preset → default font mapping. Used by the provider to resolve the user's
  * `font: 'default'` preference against the active preset.
  *
- * Presets without a font override use the browser's sans-serif. Public
- * Sans is reserved for an explicit user choice.
+ * Presets without a font override use the system sans-serif. Public
+ * Sans is reserved for an explicit user choice. Empty while `default` is the
+ * only preset.
  */
 export const PRESET_DEFAULT_FONT: Partial<
   Record<ThemePreset, ResolvedThemeFont>
-> = {
-  anthropic: 'serif',
-}
+> = {}
 
 /**
  * Resolve a user font preference + active preset into the concrete font that

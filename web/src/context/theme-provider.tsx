@@ -25,6 +25,7 @@ import {
   useState,
 } from 'react'
 
+import { LOCKED_THEME_MODE } from '@/lib/theme-customization'
 import {
   readThemePreference,
   THEME_STORAGE_KEYS,
@@ -44,6 +45,8 @@ type ThemeProviderProps = {
 }
 
 type ThemeProviderState = {
+  /** True when the mode is pinned and the mode controls should not render. */
+  modeLocked: boolean
   defaultTheme: Theme
   resolvedTheme: ResolvedTheme
   theme: Theme
@@ -52,9 +55,10 @@ type ThemeProviderState = {
 }
 
 const initialState: ThemeProviderState = {
-  defaultTheme: DEFAULT_THEME,
-  resolvedTheme: 'light',
-  theme: DEFAULT_THEME,
+  modeLocked: LOCKED_THEME_MODE !== null,
+  defaultTheme: LOCKED_THEME_MODE ?? DEFAULT_THEME,
+  resolvedTheme: LOCKED_THEME_MODE ?? 'light',
+  theme: LOCKED_THEME_MODE ?? DEFAULT_THEME,
   setTheme: () => null,
   resetTheme: () => null,
 }
@@ -74,12 +78,15 @@ function resolveTheme(theme: Theme): ResolvedTheme {
 
 export function ThemeProvider({
   children,
-  defaultTheme = DEFAULT_THEME,
+  defaultTheme: requestedDefaultTheme = DEFAULT_THEME,
   storageKey = THEME_STORAGE_KEYS.mode,
   ...props
 }: ThemeProviderProps) {
-  const [theme, _setTheme] = useState<Theme>(() =>
-    readThemePreference(storageKey, THEMES, defaultTheme)
+  const defaultTheme = LOCKED_THEME_MODE ?? requestedDefaultTheme
+  // A locked mode wins over anything saved before the lock existed.
+  const [theme, _setTheme] = useState<Theme>(
+    () =>
+      LOCKED_THEME_MODE ?? readThemePreference(storageKey, THEMES, defaultTheme)
   )
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
     resolveTheme(theme)
@@ -105,6 +112,7 @@ export function ThemeProvider({
 
   const setTheme = useCallback(
     (theme: Theme) => {
+      if (LOCKED_THEME_MODE) return
       writeThemePreference(storageKey, theme)
       _setTheme(theme)
     },
@@ -112,12 +120,14 @@ export function ThemeProvider({
   )
 
   const resetTheme = useCallback(() => {
+    if (LOCKED_THEME_MODE) return
     writeThemePreference(storageKey, null)
     _setTheme(defaultTheme)
   }, [defaultTheme, storageKey])
 
   const contextValue = useMemo(
     () => ({
+      modeLocked: LOCKED_THEME_MODE !== null,
       defaultTheme,
       resolvedTheme,
       resetTheme,

@@ -40,7 +40,7 @@ import { ScrollArea } from './ui/scroll-area'
 export function CommandMenu() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { setTheme } = useTheme()
+  const { modeLocked, setTheme } = useTheme()
   const { open, setOpen } = useSearch()
   // Offer the same pages as the sidebar, so search never lists pages the
   // user's role or the sidebar settings hide.
@@ -98,22 +98,30 @@ export function CommandMenu() {
                 })}
               </CommandGroup>
             ))}
-            <CommandSeparator />
-            <CommandGroup heading='Theme'>
-              <CommandItem onSelect={() => runCommand(() => setTheme('light'))}>
-                <Sun /> <span>{t('Light')}</span>
-              </CommandItem>
-              <CommandItem onSelect={() => runCommand(() => setTheme('dark'))}>
-                <Moon className='scale-90' />
-                <span>{t('Dark')}</span>
-              </CommandItem>
-              <CommandItem
-                onSelect={() => runCommand(() => setTheme('system'))}
-              >
-                <Laptop />
-                <span>{t('System')}</span>
-              </CommandItem>
-            </CommandGroup>
+            {!modeLocked && (
+              <>
+                <CommandSeparator />
+                <CommandGroup heading='Theme'>
+                  <CommandItem
+                    onSelect={() => runCommand(() => setTheme('light'))}
+                  >
+                    <Sun /> <span>{t('Light')}</span>
+                  </CommandItem>
+                  <CommandItem
+                    onSelect={() => runCommand(() => setTheme('dark'))}
+                  >
+                    <Moon className='scale-90' />
+                    <span>{t('Dark')}</span>
+                  </CommandItem>
+                  <CommandItem
+                    onSelect={() => runCommand(() => setTheme('system'))}
+                  >
+                    <Laptop />
+                    <span>{t('System')}</span>
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
           </ScrollArea>
         </CommandList>
       </Command>
