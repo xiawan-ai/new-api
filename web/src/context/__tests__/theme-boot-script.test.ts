@@ -56,19 +56,23 @@ afterEach(() => {
 })
 
 describe('index.html theme boot script', () => {
-  it('applies the saved dark preference to html before React mounts', () => {
-    mockSystemDarkMode(false)
-    localStorage.setItem(THEME_STORAGE_KEYS.mode, 'dark')
+  // The mode is locked to light (LOCKED_THEME_MODE): the cream paper theme has
+  // no dark counterpart, so the script must not follow saved or system dark.
+  it.each(['dark', 'light', 'system', 'sepia'])(
+    'applies light before React mounts when the saved preference is %j',
+    (saved) => {
+      mockSystemDarkMode(true)
+      localStorage.setItem(THEME_STORAGE_KEYS.mode, saved)
 
-    runBootScript()
+      runBootScript()
 
-    expect(document.documentElement).toHaveClass('dark')
-    expect(document.documentElement).not.toHaveClass('light')
-  })
+      expect(document.documentElement).toHaveClass('light')
+      expect(document.documentElement).not.toHaveClass('dark')
+    }
+  )
 
-  it('applies the saved light preference even when the system is dark', () => {
+  it('applies light when the system prefers dark and no preference is saved', () => {
     mockSystemDarkMode(true)
-    localStorage.setItem(THEME_STORAGE_KEYS.mode, 'light')
 
     runBootScript()
 
@@ -76,20 +80,12 @@ describe('index.html theme boot script', () => {
     expect(document.documentElement).not.toHaveClass('dark')
   })
 
-  it('follows the system dark mode when no preference is saved', () => {
-    mockSystemDarkMode(true)
-
-    runBootScript()
-
-    expect(document.documentElement).toHaveClass('dark')
-  })
-
-  it('follows the system light mode when the saved value is invalid', () => {
+  it('leaves the saved preference untouched for a later unlock', () => {
     mockSystemDarkMode(false)
-    localStorage.setItem(THEME_STORAGE_KEYS.mode, 'sepia')
+    localStorage.setItem(THEME_STORAGE_KEYS.mode, 'dark')
 
     runBootScript()
 
-    expect(document.documentElement).toHaveClass('light')
+    expect(localStorage.getItem(THEME_STORAGE_KEYS.mode)).toBe('dark')
   })
 })

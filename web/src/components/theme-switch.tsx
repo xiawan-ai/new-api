@@ -32,15 +32,18 @@ import { cn } from '@/lib/utils'
 
 export function ThemeSwitch() {
   const { t } = useTranslation()
-  const { theme, setTheme } = useTheme()
+  const { modeLocked, theme, setTheme } = useTheme()
 
   /* Update theme-color meta tag
-   * when theme is updated */
+   * when theme is updated. Light matches the cream paper canvas declared in
+   * index.html and styles/finch.css. */
   useEffect(() => {
-    const themeColor = theme === 'dark' ? '#020817' : '#fff'
+    const themeColor = theme === 'dark' ? '#020817' : '#f4f1e8'
     const metaThemeColor = document.querySelector("meta[name='theme-color']")
     if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor)
   }, [theme])
+
+  if (modeLocked) return null
 
   return (
     <DropdownMenu modal={false}>

@@ -27,9 +27,14 @@ import {
 import { ThemeProvider, useTheme } from '@/context/theme-provider'
 import { initializeFrontendCache } from '@/lib/frontend-cache'
 
+// The light/dark mode is locked to light (LOCKED_THEME_MODE), so a saved mode
+// is never applied or rewritten; only the customization axes round-trip.
+const MODE_STORAGE_KEY = 'newapi:theme:v1:mode'
+// `default` is the only color preset left (THEME_PRESETS), so a preset saved
+// by an older build is ignored rather than applied.
+const PRESET_STORAGE_KEY = 'newapi:theme:v1:preset'
+
 const savedPreferences = {
-  'newapi:theme:v1:mode': 'dark',
-  'newapi:theme:v1:preset': 'rose-garden',
   'newapi:theme:v1:font': 'serif',
   'newapi:theme:v1:radius': 'lg',
   'newapi:theme:v1:scale': 'sm',
@@ -51,18 +56,8 @@ function ThemeControls() {
       </button>
       <button
         type='button'
-        onClick={() => customization.setPreset('anthropic')}
-      >
-        Anthropic preset
-      </button>
-      <button type='button' onClick={() => customization.setPreset('default')}>
-        Default preset
-      </button>
-      <button
-        type='button'
         onClick={() => {
           theme.setTheme('dark')
-          customization.setPreset('rose-garden')
           customization.setFont('serif')
           customization.setRadius('lg')
           customization.setScale('sm')
@@ -123,13 +118,30 @@ describe('theme preference persistence', () => {
 
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
     expect(document.documentElement).toHaveClass('light')
     expect(document.body).not.toHaveAttribute('data-theme-preset')
     expect(document.body).toHaveAttribute('data-theme-font', 'system')
     expect(document.body).not.toHaveAttribute('data-theme-radius')
     expect(document.body).not.toHaveAttribute('data-theme-scale')
     expect(document.body).toHaveAttribute('data-theme-content-layout', 'full')
+  })
+
+  it('stays light when a dark mode was saved and the user asks for dark again', async () => {
+    localStorage.setItem(MODE_STORAGE_KEY, 'dark')
+    const user = userEvent.setup()
+    render(<ThemeFixture />)
+
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
+    expect(document.documentElement).toHaveClass('light')
+    expect(document.documentElement).not.toHaveClass('dark')
+
+    await user.click(screen.getByRole('button', { name: 'Customize' }))
+
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
+    expect(document.documentElement).toHaveClass('light')
+    expect(document.documentElement).not.toHaveClass('dark')
+    expect(localStorage.getItem(MODE_STORAGE_KEY)).toBe('dark')
   })
 
   it('restores all customized preferences after remounting without writing cookies', async () => {
@@ -140,9 +152,9 @@ describe('theme preference persistence', () => {
     first.unmount()
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
-    expect(document.documentElement).toHaveClass('dark')
-    expect(document.body).toHaveAttribute('data-theme-preset', 'rose-garden')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
+    expect(document.documentElement).toHaveClass('light')
+    expect(document.body).not.toHaveAttribute('data-theme-preset')
     expect(document.body).toHaveAttribute('data-theme-font', 'serif')
     expect(document.body).toHaveAttribute('data-theme-radius', 'lg')
     expect(document.body).toHaveAttribute('data-theme-scale', 'sm')
@@ -153,6 +165,7 @@ describe('theme preference persistence', () => {
     for (const [key, value] of Object.entries(savedPreferences)) {
       expect(localStorage.getItem(key)).toBe(value)
     }
+    expect(localStorage.getItem(MODE_STORAGE_KEY)).toBeNull()
     expect(document.cookie).toBe('')
   })
 
@@ -169,7 +182,7 @@ describe('theme preference persistence', () => {
     first.unmount()
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
     expect(document.documentElement).toHaveClass('light')
     expect(document.body).not.toHaveAttribute('data-theme-preset')
     expect(document.body).toHaveAttribute('data-theme-font', 'system')
@@ -183,6 +196,17 @@ describe('theme preference persistence', () => {
     expect(document.cookie).toContain('theme_preset=ocean-breeze')
   })
 
+  it.each(['rose-garden', 'anthropic'])(
+    'keeps the default palette when the removed preset %j is still saved',
+    (preset) => {
+      localStorage.setItem(PRESET_STORAGE_KEY, preset)
+
+      render(<ThemeFixture />)
+
+      expect(document.body).not.toHaveAttribute('data-theme-preset')
+    }
+  )
+
   it.each(['', 'unknown'])(
     'uses defaults when stored preferences are %j',
     (value) => {
@@ -192,7 +216,7 @@ describe('theme preference persistence', () => {
 
       render(<ThemeFixture />)
 
-      expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
+      expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
       expect(document.body).not.toHaveAttribute('data-theme-preset')
       expect(document.body).toHaveAttribute('data-theme-font', 'system')
       expect(document.body).not.toHaveAttribute('data-theme-radius')
@@ -208,7 +232,7 @@ describe('theme preference persistence', () => {
 
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
     expect(document.body).not.toHaveAttribute('data-theme-preset')
   })
 
@@ -224,13 +248,15 @@ describe('theme preference persistence', () => {
 
     await user.click(screen.getByRole('button', { name: 'Customize' }))
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
-    expect(document.body).toHaveAttribute('data-theme-preset', 'rose-garden')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
+    expect(document.body).toHaveAttribute('data-theme-font', 'serif')
+    expect(document.body).toHaveAttribute('data-theme-radius', 'lg')
 
     await user.click(screen.getByRole('button', { name: 'Reset' }))
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('system')
-    expect(document.body).not.toHaveAttribute('data-theme-preset')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
+    expect(document.body).toHaveAttribute('data-theme-font', 'system')
+    expect(document.body).not.toHaveAttribute('data-theme-radius')
   })
 
   it('preserves saved theme preferences during frontend cache initialization', () => {
@@ -243,8 +269,8 @@ describe('theme preference persistence', () => {
     initializeFrontendCache()
     render(<ThemeFixture />)
 
-    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('dark')
-    expect(document.body).toHaveAttribute('data-theme-preset', 'rose-garden')
+    expect(screen.getByLabelText('Theme mode')).toHaveTextContent('light')
+    expect(document.body).toHaveAttribute('data-theme-font', 'serif')
     for (const [key, value] of Object.entries(savedPreferences)) {
       expect(localStorage.getItem(key)).toBe(value)
     }
@@ -253,7 +279,7 @@ describe('theme preference persistence', () => {
 })
 
 describe('theme font selection', () => {
-  it('keeps manually selected Sans after remounting and switching presets', async () => {
+  it('keeps manually selected Sans after remounting', async () => {
     const user = userEvent.setup()
     const first = render(<ThemeFixture />)
 
@@ -263,10 +289,6 @@ describe('theme font selection', () => {
 
     expect(document.body).toHaveAttribute('data-theme-font', 'sans')
     expect(localStorage.getItem('newapi:theme:v1:font')).toBe('sans')
-
-    await user.click(screen.getByRole('button', { name: 'Anthropic preset' }))
-
-    expect(document.body).toHaveAttribute('data-theme-font', 'sans')
   })
 
   it('restores the browser font after selecting Auto and remounting', async () => {
@@ -283,19 +305,5 @@ describe('theme font selection', () => {
     render(<ThemeFixture />)
 
     expect(document.body).toHaveAttribute('data-theme-font', 'system')
-  })
-
-  it('uses the preset font in Auto and restores the browser font on the default preset', async () => {
-    const user = userEvent.setup()
-    render(<ThemeFixture />)
-
-    await user.click(screen.getByRole('button', { name: 'Anthropic preset' }))
-
-    expect(document.body).toHaveAttribute('data-theme-font', 'serif')
-
-    await user.click(screen.getByRole('button', { name: 'Default preset' }))
-
-    expect(document.body).toHaveAttribute('data-theme-font', 'system')
-    expect(localStorage.getItem('newapi:theme:v1:font')).toBeNull()
   })
 })

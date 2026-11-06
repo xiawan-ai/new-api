@@ -1,0 +1,228 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+/*
+ * Finch base theme — the house style of this deployment.
+ *
+ * Mirrors the Finch website design system (finch-website
+ * `docs/design-system.md` + `src/app/globals.css`):
+ *   60% editorial magazine, 30% Swiss grid, 10% paper texture.
+ *   Cream paper canvas, forest green as the one brand color, a little warm
+ *   orange for editorial marks, serif headlines over sans body text.
+ *
+ * These tokens replace the neutral `:root` palette from ./theme.css, so they
+ * are the look of the `default` preset — the only one — and apply before JS
+ * boots (no flash).
+ *
+ * Imported after ./theme.css on purpose: same `:root` specificity, later wins.
+ */
+
+@theme inline {
+  --font-display: var(--font-heading);
+
+  /* Brand slots the public pages use next to the shadcn semantic tokens. */
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-ink: var(--brand-accent-ink);
+  --color-paper: var(--paper);
+}
+
+:root {
+  /* ── Finch palette ─────────────────────────────────────────────────── */
+  --finch-cream: #f4f1e8; /* page paper */
+  --finch-cream-light: #faf8f2; /* lifted paper: cards, popovers */
+  --finch-chrome: #efece2; /* app chrome: sidebar, quiet fills */
+  --finch-forest: #3f6b56; /* brand emphasis, hover */
+  --finch-forest-dark: #22392f; /* primary CTA, dark sections */
+  --finch-sage: #9fc2ab;
+  --finch-orange: #e08a4d; /* editorial marks only, never a main CTA */
+  --finch-charcoal: #4a3a4a; /* ink */
+  --finch-ink-muted: #6f695f; /* secondary ink, 4.8:1 on cream */
+
+  /* ── Brand slots ───────────────────────────────────────────────────── */
+  --brand: var(--finch-forest);
+  --brand-soft: var(--finch-sage);
+  --brand-accent: var(--finch-orange);
+  /* Orange is 2.4:1 on cream — fine for a rule or a dot, not for text.
+   * Small accent text uses this burnt tone instead (4.8:1). */
+  --brand-accent-ink: #a4551d;
+  --paper: var(--finch-cream-light);
+
+  /* ── Typography ────────────────────────────────────────────────────── */
+  /* Body and UI stay sans; serif is reserved for headlines and brand text. */
+  --font-ui-sans:
+    -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei',
+    Helvetica, Arial, sans-serif;
+  --font-heading: var(--font-serif);
+
+  /* Finch keeps corners small: rounded-lg = 8px, rounded-xl ≈ 11px. */
+  --radius: 0.5rem;
+
+  /* ── Semantic tokens ───────────────────────────────────────────────── */
+  --background: var(--finch-cream);
+  --foreground: var(--finch-charcoal);
+  --card: var(--finch-cream-light);
+  --card-foreground: var(--finch-charcoal);
+  --popover: var(--finch-cream-light);
+  --popover-foreground: var(--finch-charcoal);
+
+  --primary: var(--finch-forest-dark);
+  --primary-foreground: var(--finch-cream);
+  --secondary: var(--finch-chrome);
+  --secondary-foreground: var(--finch-forest-dark);
+
+  --muted: var(--finch-chrome);
+  --muted-foreground: var(--finch-ink-muted);
+  /* Hover wash for ghost buttons and menu rows (Finch: `bg-forest/8`). */
+  --accent: color-mix(in oklch, var(--finch-forest) 10%, var(--finch-cream));
+  --accent-foreground: var(--finch-forest-dark);
+
+  --destructive: oklch(0.55 0.18 27);
+  --destructive-foreground: var(--finch-cream-light);
+  --success: var(--finch-forest);
+  --success-foreground: var(--finch-cream-light);
+  --warning: #d07a38;
+  --warning-foreground: #2a1f14;
+  --info: #456f7c;
+  --info-foreground: var(--finch-cream-light);
+  --neutral: var(--finch-ink-muted);
+  --neutral-foreground: var(--finch-cream-light);
+
+  /* Hairlines are ink on paper, never tinted with the brand color. */
+  --border: color-mix(in oklch, var(--finch-charcoal) 13%, var(--finch-cream));
+  --input: color-mix(in oklch, var(--finch-charcoal) 20%, var(--finch-cream));
+  --ring: var(--finch-forest);
+
+  --chart-1: var(--finch-forest);
+  --chart-2: var(--finch-orange);
+  --chart-3: var(--finch-sage);
+  --chart-4: #8b6f8b; /* plum, lifted from the charcoal ink's hue */
+  --chart-5: #c9b27a; /* wheat */
+  --overview-accent-1: var(--finch-forest);
+  --overview-accent-2: var(--finch-orange);
+  --overview-accent-3: #8b6f8b;
+
+  --sidebar: var(--finch-chrome);
+  --sidebar-foreground: var(--finch-charcoal);
+  --sidebar-primary: var(--finch-forest-dark);
+  --sidebar-primary-foreground: var(--finch-cream);
+  --sidebar-accent: color-mix(
+    in oklch,
+    var(--finch-forest) 11%,
+    var(--finch-chrome)
+  );
+  --sidebar-accent-foreground: var(--finch-forest-dark);
+  --sidebar-border: color-mix(
+    in oklch,
+    var(--finch-charcoal) 12%,
+    var(--finch-chrome)
+  );
+  --sidebar-ring: var(--finch-forest);
+
+  --skeleton-base: #ebe7dc;
+  --skeleton-highlight: #f7f4ec;
+}
+
+/* An explicit Sans choice in the font axis also takes the headlines. */
+[data-theme-font='sans'] {
+  --font-heading: var(--font-ui-sans);
+}
+
+@layer base {
+  /* Serif headlines, sans everything else. Lives in the base layer so a
+   * `font-sans` / `font-mono` utility on a heading still wins. h4–h6 and
+   * card titles are UI labels in this app and stay sans. */
+  :is(h1, h2, h3),
+  [data-slot='dialog-title'],
+  [data-slot='alert-dialog-title'],
+  [data-slot='sheet-title'],
+  [data-slot='drawer-title'] {
+    font-family: var(--font-heading);
+    letter-spacing: -0.012em;
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--brand-soft) 50%, var(--background));
+  }
+}
+
+/* ── Paper & editorial helpers (public pages) ─────────────────────────── */
+
+:root {
+  /* Finch layout rhythm: one 1120px content width, fluid gutters and
+   * section spacing. Wide screens add margin, never wider content. */
+  --finch-container-wide: 1120px;
+  --finch-page-gutter: clamp(20px, 4vw, 48px);
+  --finch-section-space: clamp(72px, 9vw, 128px);
+}
+
+.finch-container {
+  width: min(
+    100% - (var(--finch-page-gutter) * 2),
+    var(--finch-container-wide)
+  );
+  margin-inline: auto;
+}
+
+.finch-section {
+  padding-block: var(--finch-section-space);
+}
+
+/* Barely-there paper grain plus one soft forest wash. Hero sections only;
+ * it must never cost text contrast. */
+.finch-paper-texture {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      circle at 22% 8%,
+      color-mix(in oklch, var(--brand) 6%, transparent),
+      transparent 28%
+    ),
+    url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+}
+
+/* Canvas layer for the hero's ASCII wave field. The mask thins the characters
+ * out behind the headline so they never compete with the text. */
+.finch-ascii-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    ellipse 72% 58% at 30% 34%,
+    rgba(0, 0, 0, 0.3),
+    #000 78%
+  );
+  mask-image: radial-gradient(
+    ellipse 72% 58% at 30% 34%,
+    rgba(0, 0, 0, 0.3),
+    #000 78%
+  );
+}
+
+/* Small caps label that opens a section. */
+.finch-eyebrow {
+  font-family: var(--font-ui-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-accent-ink);
+}
