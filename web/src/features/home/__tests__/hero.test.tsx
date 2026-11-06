@@ -44,11 +44,16 @@ vi.mock('@tanstack/react-router', async (importOriginal) => ({
   ),
 }))
 
-function renderHero(options: { isAuthenticated: boolean; docsLink?: string }) {
+function renderHero(options: {
+  isAuthenticated: boolean
+  serverAddress?: string
+}) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  client.setQueryData(STATUS_QUERY_KEY, { docs_link: options.docsLink })
+  client.setQueryData(STATUS_QUERY_KEY, {
+    server_address: options.serverAddress,
+  })
   render(
     <QueryClientProvider client={client}>
       <Hero isAuthenticated={options.isAuthenticated} />
@@ -67,41 +72,49 @@ beforeEach(() => {
 })
 
 describe('home hero', () => {
-  it('offers a guest one headline with sign-up as the primary action and pricing as a link', () => {
+  it('offers a guest one headline with sign-up as the primary action and the price list as a link', () => {
     renderHero({ isAuthenticated: false })
 
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
-    expect(linkFor('Get Started')).toHaveAttribute('href', '/sign-up')
-    expect(linkFor('View Pricing')).toHaveAttribute('href', '/pricing')
+    expect(linkFor('Get your API key')).toHaveAttribute('href', '/sign-up')
+    expect(linkFor('See models and prices')).toHaveAttribute(
+      'href',
+      '/pricing'
+    )
     expect(screen.queryByText('Go to Dashboard')).not.toBeInTheDocument()
   })
 
-  it('sends a signed-in user to the dashboard and drops the sign-up and pricing actions', () => {
+  it('sends a signed-in user to the dashboard instead of sign-up', () => {
     renderHero({ isAuthenticated: true })
 
     expect(linkFor('Go to Dashboard')).toHaveAttribute('href', '/dashboard')
-    expect(screen.queryByText('Get Started')).not.toBeInTheDocument()
-    expect(screen.queryByText('View Pricing')).not.toBeInTheDocument()
+    expect(screen.queryByText('Get your API key')).not.toBeInTheDocument()
+    expect(linkFor('See models and prices')).toHaveAttribute(
+      'href',
+      '/pricing'
+    )
   })
 
-  it('opens an external docs address in a new tab', () => {
+  it('shows the configured server address as the base URL without a trailing slash', () => {
     renderHero({
       isAuthenticated: false,
-      docsLink: 'https://docs.example.com',
+      serverAddress: 'https://api.example.com/',
     })
 
-    const docs = linkFor('Docs')
-    expect(docs).toHaveAttribute('href', 'https://docs.example.com')
-    expect(docs).toHaveAttribute('target', '_blank')
-    expect(docs).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(screen.getByTestId('hero-base-url')).toHaveTextContent(
+      'https://api.example.com'
+    )
+    expect(
+      screen.getByRole('button', { name: 'Copy base URL' })
+    ).toBeInTheDocument()
   })
 
-  it('keeps an in-app docs address in the same tab', () => {
-    renderHero({ isAuthenticated: false, docsLink: '/docs' })
+  it('falls back to the page origin when no server address is configured', () => {
+    renderHero({ isAuthenticated: false })
 
-    const docs = linkFor('Docs')
-    expect(docs).toHaveAttribute('href', '/docs')
-    expect(docs).not.toHaveAttribute('target')
+    expect(screen.getByTestId('hero-base-url')).toHaveTextContent(
+      window.location.origin
+    )
   })
 
   it('hides the decorative background from assistive technology', () => {

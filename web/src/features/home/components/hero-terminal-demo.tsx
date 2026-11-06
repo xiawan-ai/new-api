@@ -164,6 +164,8 @@ const TRANSITION_MS = 220
 
 interface HeroTerminalDemoProps {
   className?: string
+  /** The address the request lines are shown against; empty shows paths only. */
+  baseUrl?: string
 }
 
 export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
@@ -203,6 +205,7 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
 
   const demo = API_DEMOS[activeIndex]
   const accent = ACCENT_CLASSES[demo.accent]
+  const requestUrl = `${props.baseUrl ?? ''}${demo.endpoint}`
 
   return (
     <div className={cn('mx-auto w-full max-w-2xl', props.className)}>
@@ -266,14 +269,18 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
               transitioning ? 'opacity-0' : 'opacity-100'
             )}
           >
-            {demo.endpoint}
+            {requestUrl}
           </code>
         </div>
 
         {/* Body — fixed rows so neither block shifts when switching demos */}
         <div className='grid h-[400px] grid-rows-[235px_minmax(0,1fr)] font-mono text-[12.5px] leading-[1.55]'>
           {/* Request */}
-          <RequestBlock demo={demo} transitioning={transitioning} />
+          <RequestBlock
+            demo={demo}
+            requestUrl={requestUrl}
+            transitioning={transitioning}
+          />
 
           {/* Response */}
           <ResponseBlock demo={demo} transitioning={transitioning} />
@@ -313,8 +320,12 @@ export function HeroTerminalDemo(props: HeroTerminalDemoProps) {
   )
 }
 
-function RequestBlock(props: { demo: ApiDemoConfig; transitioning: boolean }) {
-  const { demo, transitioning } = props
+function RequestBlock(props: {
+  demo: ApiDemoConfig
+  requestUrl: string
+  transitioning: boolean
+}) {
+  const { demo, requestUrl, transitioning } = props
 
   return (
     <div className='relative px-5 py-4'>
@@ -327,7 +338,7 @@ function RequestBlock(props: { demo: ApiDemoConfig; transitioning: boolean }) {
       >
         <CodeLine>
           <Command>curl</Command> <Flag>-X</Flag> <Flag>POST</Flag>{' '}
-          <StringText>&quot;{demo.endpoint}&quot;</StringText>{' '}
+          <StringText>&quot;{requestUrl}&quot;</StringText>{' '}
           <Muted>{'\\'}</Muted>
         </CodeLine>
         {demo.headers.map((header) => (
