@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { CherryStudio } from '@lobehub/icons'
 import { ArrowUpRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -52,49 +51,8 @@ export function Apps() {
                 rel='noopener noreferrer'
                 className={APP_ROW_CLASS}
               >
-                <img
-                  src='/finch-mark.svg'
-                  alt=''
-                  className='size-7 shrink-0'
-                />
-                <span>Finch</span>
-                <ArrowUpRight
-                  className='text-muted-foreground group-hover:text-primary ml-auto size-4 transition-colors'
-                  aria-hidden='true'
-                />
-              </a>
-            </li>
-
-            <li className='border-foreground/10 border-b'>
-              <a
-                href='https://cherry-ai.com'
-                target='_blank'
-                rel='noopener noreferrer'
-                className={APP_ROW_CLASS}
-              >
-                <CherryStudio.Color size={28} className='shrink-0' />
-                <span>Cherry Studio</span>
-                <ArrowUpRight
-                  className='text-muted-foreground group-hover:text-primary ml-auto size-4 transition-colors'
-                  aria-hidden='true'
-                />
-              </a>
-            </li>
-
-            <li className='border-foreground/10 border-b'>
-              <a
-                href='https://ccswitch.io'
-                target='_blank'
-                rel='noopener noreferrer'
-                className={APP_ROW_CLASS}
-              >
-                <span
-                  className='bg-brand/10 text-brand flex size-7 shrink-0 items-center justify-center rounded-md text-[11px] font-bold'
-                  aria-hidden='true'
-                >
-                  CC
-                </span>
-                <span>CC Switch</span>
+                <img src='/finch-mark.svg' alt='' className='size-7 shrink-0' />
+                <span>Finch Agent</span>
                 <ArrowUpRight
                   className='text-muted-foreground group-hover:text-primary ml-auto size-4 transition-colors'
                   aria-hidden='true'

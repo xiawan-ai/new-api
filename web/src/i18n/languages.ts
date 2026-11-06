@@ -29,6 +29,13 @@ export const INTERFACE_LANGUAGE_OPTIONS = [
 export type InterfaceLanguageCode =
   (typeof INTERFACE_LANGUAGE_OPTIONS)[number]['code']
 
+/**
+ * The language a visitor sees until they pick one themselves. The browser's
+ * own language is not consulted: this site is written for Simplified Chinese
+ * readers first, and the language switcher covers everyone else.
+ */
+export const DEFAULT_INTERFACE_LANGUAGE: InterfaceLanguageCode = 'zhCN'
+
 export function normalizeInterfaceLanguage(value?: string | null): string {
   if (!value) return 'en'
 

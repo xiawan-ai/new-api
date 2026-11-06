@@ -22,18 +22,26 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { AnimateInView } from '@/components/animate-in-view'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePricingData } from '@/features/pricing/hooks/use-pricing-data'
+import { parseTags } from '@/features/pricing/lib/filters'
 import { formatPrice } from '@/features/pricing/lib/price'
 import { useStatus } from '@/hooks/use-status'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { getModuleAccessFromStatus } from '@/lib/nav-modules'
 
-import { FEATURED_MODEL_LIMIT, selectFeaturedModels } from '../../lib/featured-models'
+import {
+  FEATURED_MODEL_LIMIT,
+  selectFeaturedModels,
+} from '../../lib/featured-models'
 
 interface ModelsProps {
   isAuthenticated?: boolean
 }
+
+// A row has room for the name and a couple of short tags, such as a discount.
+const MODEL_TAG_LIMIT = 2
 
 const SECTION_LINK_CLASS =
   'group text-primary hover:text-brand focus-visible:outline-ring inline-flex min-h-11 items-center gap-1.5 rounded-sm text-[15px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2'
@@ -55,7 +63,10 @@ export function Models(props: ModelsProps) {
     body = (
       <p className='text-muted-foreground mt-10 max-w-xl text-base leading-[1.75]'>
         {t('Sign in to see the full price list.')}{' '}
-        <Link to='/sign-in' className='text-primary underline underline-offset-4'>
+        <Link
+          to='/sign-in'
+          className='text-primary underline underline-offset-4'
+        >
           {t('Sign in')}
         </Link>
       </p>
@@ -97,8 +108,21 @@ export function Models(props: ModelsProps) {
                 {icon ?? model.model_name.charAt(0).toUpperCase()}
               </span>
               <span className='min-w-0'>
-                <span className='block truncate text-[15px] font-semibold'>
-                  {model.model_name}
+                <span className='flex min-w-0 items-center gap-2'>
+                  <span className='truncate text-[15px] font-semibold'>
+                    {model.model_name}
+                  </span>
+                  {parseTags(model.tags)
+                    .slice(0, MODEL_TAG_LIMIT)
+                    .map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant='outline'
+                        className='border-brand/30 bg-brand/8 text-brand'
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
                 </span>
                 {model.vendor_name && (
                   <span className='text-muted-foreground block truncate text-sm'>

@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 
 import { AnimateInView } from '@/components/animate-in-view'
 import {
@@ -25,12 +25,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { useSystemConfig } from '@/hooks/use-system-config'
 
 import { useApiBaseUrl } from '../../hooks'
 
 export function Faq() {
   const { t } = useTranslation()
   const baseUrl = useApiBaseUrl()
+  const { systemName } = useSystemConfig()
 
   const items = [
     {
@@ -43,8 +45,22 @@ export function Faq() {
     {
       id: 'subscription',
       question: t('Do I need a subscription?'),
-      answer: t(
-        'No. Add credit when you need it. There are no monthly fees and no minimum top-up.'
+      answer: (
+        <Trans
+          t={t}
+          i18nKey='No. Top up {{siteName}} when you need it. There are no monthly fees. For bigger discounts, sign up in <agent>Finch Agent</agent> and subscribe to a monthly plan.'
+          values={{ siteName: systemName }}
+          components={{
+            agent: (
+              <a
+                href='https://finchwork.app'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-primary hover:text-brand underline underline-offset-4 transition-colors'
+              />
+            ),
+          }}
+        />
       ),
     },
     {

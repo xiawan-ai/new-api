@@ -54,6 +54,7 @@ const pricing: PricingData = {
       model_ratio: 0.125, // $0.25 / 1M input
       completion_ratio: 8, // $2 / 1M output
       enable_groups: ['default'],
+      tags: 'Half-price,Fast,Vision',
     },
     {
       id: 2,
@@ -107,6 +108,14 @@ describe('home models section', () => {
       'href',
       '/pricing'
     )
+  })
+
+  it('shows the first two tags of a model beside its name', () => {
+    renderModels({})
+
+    expect(screen.getByText('Half-price')).toBeInTheDocument()
+    expect(screen.getByText('Fast')).toBeInTheDocument()
+    expect(screen.queryByText('Vision')).not.toBeInTheDocument()
   })
 
   it('renders nothing when the pricing page is disabled', () => {
