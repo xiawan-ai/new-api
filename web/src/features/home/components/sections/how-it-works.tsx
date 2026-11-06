@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Settings, Zap, BarChart3 } from 'lucide-react'
+import { KeyRound, Plug, UserRoundPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { AnimateInView } from '@/components/animate-in-view'
@@ -27,38 +27,38 @@ export function HowItWorks() {
   const steps = [
     {
       num: '1',
-      title: t('Configure'),
-      desc: t(
-        'Add your API keys, set up channels and configure access permissions'
-      ),
-      icon: <Settings className='size-5' strokeWidth={1.5} />,
+      title: t('Create an account'),
+      desc: t('Sign up with your email. It takes about a minute.'),
+      icon: <UserRoundPlus className='size-5' strokeWidth={1.5} />,
     },
     {
       num: '2',
-      title: t('Connect'),
+      title: t('Add credit and create a key'),
       desc: t(
-        'Connect through OpenAI, Claude, Gemini, and other compatible API routes'
+        'Top up any amount you like, then create an API key in the console.'
       ),
-      icon: <Zap className='size-5' strokeWidth={1.5} />,
+      icon: <KeyRound className='size-5' strokeWidth={1.5} />,
     },
     {
       num: '3',
-      title: t('Monitor'),
-      desc: t('Track usage, costs and performance with real-time analytics'),
-      icon: <BarChart3 className='size-5' strokeWidth={1.5} />,
+      title: t('Point your app at the base URL'),
+      desc: t(
+        'Paste the base URL and your key into Finch, Cherry Studio, or your own code. Then send your first request.'
+      ),
+      icon: <Plug className='size-5' strokeWidth={1.5} />,
     },
   ]
 
   return (
     <section
       id='how-it-works'
-      className='finch-section bg-paper relative z-10 border-t'
+      className='bg-paper finch-section relative z-10 border-t'
     >
       <div className='finch-container'>
         <AnimateInView className='max-w-2xl'>
           <p className='finch-eyebrow'>{t('How It Works')}</p>
           <h2 className='mt-4 text-[clamp(2rem,4.5vw,3.25rem)] leading-[1.15] font-semibold tracking-[-0.02em]'>
-            {t('Three steps to get started')}
+            {t('Three steps to your first request')}
           </h2>
         </AnimateInView>
 

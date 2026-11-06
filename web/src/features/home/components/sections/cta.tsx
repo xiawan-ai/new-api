@@ -41,15 +41,15 @@ export function CTA(props: CTAProps) {
       <div className='finch-container finch-section flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between'>
         <AnimateInView className='max-w-2xl'>
           <h2 className='text-[clamp(2rem,4.5vw,3.25rem)] leading-[1.15] font-semibold tracking-[-0.02em]'>
-            {t('Ready to simplify')}
+            {t('Ready to make')}
             <br />
             <em className='text-brand-soft not-italic'>
-              {t('your AI integration?')}
+              {t('your first request?')}
             </em>
           </h2>
           <p className='text-primary-foreground/75 mt-5 max-w-xl text-[17px] leading-[1.75]'>
             {t(
-              'Deploy your own gateway and start routing requests through your configured upstream services.'
+              'Create an account, add credit and copy your key. It takes a few minutes.'
             )}
           </p>
         </AnimateInView>
@@ -62,14 +62,14 @@ export function CTA(props: CTAProps) {
             className='group bg-background text-primary [a]:hover:bg-background/90 h-12 rounded-lg px-7 text-[15px] font-semibold'
             render={<Link to='/sign-up' />}
           >
-            {t('Get Started')}
+            {t('Get your API key')}
             <ArrowRight className='ml-1.5 size-4 transition-transform duration-200 group-hover:translate-x-0.5' />
           </Button>
           <Link
             to='/pricing'
             className='text-primary-foreground/80 decoration-primary-foreground/40 hover:text-primary-foreground focus-visible:outline-primary-foreground inline-flex min-h-11 items-center rounded-sm text-[15px] underline underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2'
           >
-            {t('View Pricing')}
+            {t('See models and prices')}
           </Link>
         </AnimateInView>
       </div>
