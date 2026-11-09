@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
-import { Fragment, useMemo } from 'react'
+import { Fragment, type ReactNode, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useStatus } from '@/hooks/use-status'
@@ -48,10 +48,27 @@ interface FooterProps {
 const FOOTER_LINK_CLASS =
   'text-background/80 hover:text-background text-sm underline-offset-4 transition-colors duration-200 hover:underline'
 
-function FooterLinkItem(props: { link: FooterLink }) {
+const SITE_FILINGS = [
+  {
+    text: '粤公网安备44030002018453号',
+    href: 'https://beian.mps.gov.cn/#/query/webSearch?code=44030002018453',
+    icon: '/beian-gongan.png',
+  },
+  {
+    text: '粤ICP备2026152027号-1',
+    href: 'https://beian.miit.gov.cn/',
+    icon: undefined,
+  },
+] as const
+
+function FooterLinkItem(props: {
+  link: FooterLink
+  className?: string
+  children?: ReactNode
+}) {
   const { t } = useTranslation()
   const isExternal = props.link.href.startsWith('http')
-  const label = t(props.link.text)
+  const label = props.children ?? t(props.link.text)
 
   if (isExternal) {
     return (
@@ -59,7 +76,7 @@ function FooterLinkItem(props: { link: FooterLink }) {
         href={props.link.href}
         target='_blank'
         rel='noopener noreferrer'
-        className={FOOTER_LINK_CLASS}
+        className={cn(FOOTER_LINK_CLASS, props.className)}
       >
         {label}
       </a>
@@ -67,7 +84,10 @@ function FooterLinkItem(props: { link: FooterLink }) {
   }
 
   return (
-    <Link to={props.link.href} className={FOOTER_LINK_CLASS}>
+    <Link
+      to={props.link.href}
+      className={cn(FOOTER_LINK_CLASS, props.className)}
+    >
       {label}
     </Link>
   )
@@ -128,7 +148,7 @@ export function Footer(props: FooterProps) {
 
   const displayLogo = systemLogo || props.logo || '/logo.png'
   const displayName = systemName || props.name || 'New API'
-  const isDemoSiteMode = Boolean(demoSiteEnabled)
+  const showDemoContent = Boolean(demoSiteEnabled) && !footerHtml
   const currentYear = new Date().getFullYear()
 
   const fallbackColumns = useMemo<FooterColumnProps[]>(
@@ -190,27 +210,6 @@ export function Footer(props: FooterProps) {
 
   const displayColumns = props.columns ?? fallbackColumns
 
-  if (footerHtml) {
-    return (
-      <footer
-        className={cn(
-          'bg-foreground text-background relative z-10',
-          props.className
-        )}
-      >
-        <div className='finch-container py-8'>
-          <div className='flex flex-col items-center justify-between gap-4 sm:flex-row'>
-            <div
-              className='custom-footer text-background/80 min-w-0 text-center text-sm sm:text-left'
-              dangerouslySetInnerHTML={{ __html: footerHtml }}
-            />
-            <LegalLinks className='border-background/15 text-background/65 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5' />
-          </div>
-        </div>
-      </footer>
-    )
-  }
-
   return (
     <footer
       className={cn(
@@ -218,28 +217,30 @@ export function Footer(props: FooterProps) {
         props.className
       )}
     >
-      <div className='finch-container py-14 md:py-20'>
-        <div className='flex flex-col justify-between gap-10 md:flex-row md:gap-16'>
-          {/* Brand column */}
-          <div className='shrink-0'>
-            <Link to='/' className='group flex items-center gap-2.5'>
-              {/* Paper tile: a dark or line-art logo would vanish on the ink ground. */}
-              <img
-                src={displayLogo}
-                alt={displayName}
-                className='bg-background size-8 rounded-lg object-contain p-1'
-              />
-              <span className='font-display text-lg font-semibold'>
-                {displayName}
-              </span>
-            </Link>
-            <p className='text-background/65 mt-4 max-w-[260px] text-[13.5px] leading-[1.7]'>
-              {t('Powerful API Management Platform')}
-            </p>
-          </div>
+      <div
+        className={cn('finch-container py-8', showDemoContent && 'md:py-14')}
+      >
+        {showDemoContent && (
+          <div className='flex flex-col justify-between gap-10 md:flex-row md:gap-16'>
+            {/* Brand column */}
+            <div className='shrink-0'>
+              <Link to='/' className='group flex items-center gap-2.5'>
+                {/* Paper tile: a dark or line-art logo would vanish on the ink ground. */}
+                <img
+                  src={displayLogo}
+                  alt={displayName}
+                  className='bg-background size-8 rounded-lg object-contain p-1'
+                />
+                <span className='font-display text-lg font-semibold'>
+                  {displayName}
+                </span>
+              </Link>
+              <p className='text-background/65 mt-4 max-w-[260px] text-[13.5px] leading-[1.7]'>
+                {t('Powerful API Management Platform')}
+              </p>
+            </div>
 
-          {/* Links columns */}
-          {isDemoSiteMode && (
+            {/* Links columns */}
             <div className='grid grid-cols-3 gap-8 md:gap-16'>
               {displayColumns.map((column) => (
                 <div key={column.title}>
@@ -256,17 +257,48 @@ export function Footer(props: FooterProps) {
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Site copyright and optional legal links wrap on narrow screens. */}
-        <div className='border-background/15 mt-14 flex flex-col items-center justify-between gap-x-3 gap-y-2 border-t pt-6 sm:flex-row'>
-          <div className='text-background/65 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs sm:justify-start'>
-            <span>
-              &copy; {currentYear} {displayName}.{' '}
-              {props.copyright ?? t('footer.defaultCopyright')}
-            </span>
-            <LegalLinks leadingSeparator />
+        <div
+          className={cn(
+            'flex flex-col items-center justify-between gap-x-8 gap-y-4 lg:flex-row',
+            showDemoContent && 'mt-14'
+          )}
+        >
+          <div className='text-background/65 min-w-0 flex-1 space-y-2 text-center text-xs lg:text-left'>
+            {footerHtml ? (
+              <div
+                className='custom-footer text-background/80 text-sm wrap-anywhere'
+                dangerouslySetInnerHTML={{ __html: footerHtml }}
+              />
+            ) : (
+              <p>
+                &copy; {currentYear} Finch Agent · 虾丸科技（深圳）有限公司{' '}
+                {props.copyright ?? t('footer.defaultCopyright')}
+              </p>
+            )}
+            <LegalLinks className='flex flex-wrap items-center justify-center gap-x-3 gap-y-1 lg:justify-start' />
+          </div>
+          <div className='flex max-w-full min-w-0 flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:shrink-0 lg:justify-end'>
+            {SITE_FILINGS.map((filing) => (
+              <FooterLinkItem
+                key={filing.href}
+                link={filing}
+                className='inline-flex max-w-full items-center gap-1.5 rounded-sm text-xs wrap-anywhere focus-visible:outline-2 focus-visible:outline-offset-4'
+              >
+                {filing.icon && (
+                  <img
+                    src={filing.icon}
+                    alt=''
+                    width={20}
+                    height={20}
+                    className='size-5 shrink-0'
+                  />
+                )}
+                {filing.text}
+              </FooterLinkItem>
+            ))}
           </div>
         </div>
       </div>

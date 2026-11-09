@@ -24,8 +24,10 @@ import {
   RouterProvider,
 } from '@tanstack/react-router'
 import { render, screen, within } from '@testing-library/react'
+import i18next from 'i18next'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import zh from '@/i18n/locales/zh.json'
 import { STATUS_QUERY_KEY } from '@/lib/status-query'
 import {
   DEFAULT_CURRENCY_CONFIG,
@@ -37,14 +39,16 @@ import { Footer } from '../components/footer'
 const originalConfig = useSystemConfigStore.getState()
 let client: QueryClient
 
-beforeEach(() => {
+beforeEach(async () => {
+  await i18next.changeLanguage('en')
   localStorage.clear()
   client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   })
 })
 
-afterEach(() => {
+afterEach(async () => {
+  await i18next.changeLanguage('en')
   client.clear()
   useSystemConfigStore.setState(originalConfig, true)
   localStorage.clear()
@@ -54,11 +58,12 @@ async function renderFooter(
   options: {
     footerHtml?: string
     legalEnabled?: boolean
+    systemName?: string
   } = {}
 ) {
   useSystemConfigStore.setState({
     config: {
-      systemName: 'Finch Token',
+      systemName: options.systemName ?? 'Finch Token',
       logo: '/logo.png',
       footerHtml: options.footerHtml,
       demoSiteEnabled: false,
@@ -85,6 +90,44 @@ async function renderFooter(
 }
 
 describe('site footer', () => {
+  it('shows the official company footer without framework placeholders when backend configuration is unavailable', async () => {
+    const footer = await renderFooter({ systemName: 'New API' })
+
+    expect(footer).toHaveTextContent('Finch Agent · 虾丸科技（深圳）有限公司')
+    expect(footer).not.toHaveTextContent('New API')
+    expect(footer).not.toHaveTextContent('Powerful API Management Platform')
+  })
+
+  it('matches the official Chinese copyright wording', async () => {
+    i18next.addResourceBundle('zh', 'translation', zh.translation, true, true)
+    await i18next.changeLanguage('zh')
+    const footer = await renderFooter()
+
+    expect(footer).toHaveTextContent(
+      'Finch Agent · 虾丸科技（深圳）有限公司 保留所有权利'
+    )
+  })
+
+  it('keeps the compact footer free of a decorative divider and its extra padding', async () => {
+    const footer = await renderFooter()
+    const filingGroup = within(footer).getByRole('link', {
+      name: '粤ICP备2026152027号-1',
+    }).parentElement
+
+    expect(filingGroup?.parentElement).not.toHaveClass('border-t')
+    expect(filingGroup?.parentElement).not.toHaveClass('pt-6')
+    expect(footer.querySelector('hr')).toBeNull()
+  })
+
+  it('wraps filing links below the copyright on narrow screens', async () => {
+    const footer = await renderFooter()
+    const filingGroup = within(footer).getByRole('link', {
+      name: '粤ICP备2026152027号-1',
+    }).parentElement
+
+    expect(filingGroup).toHaveClass('min-w-0', 'flex-wrap')
+    expect(filingGroup?.parentElement).toHaveClass('flex-col', 'lg:flex-row')
+  })
   it.each([
     ['default', undefined],
     ['custom', '<p>Finch Token · Site copyright</p>'],
@@ -93,7 +136,31 @@ describe('site footer', () => {
     async (_mode, footerHtml) => {
       const footer = await renderFooter({ footerHtml })
 
-      expect(footer).toHaveTextContent('Finch Token')
+      expect(footer).toHaveTextContent(
+        footerHtml
+          ? 'Finch Token · Site copyright'
+          : 'Finch Agent · 虾丸科技（深圳）有限公司'
+      )
+      const publicSecurity = within(footer).getByRole('link', {
+        name: '粤公网安备44030002018453号',
+      })
+      const icp = within(footer).getByRole('link', {
+        name: '粤ICP备2026152027号-1',
+      })
+      expect(publicSecurity).toHaveAttribute(
+        'href',
+        'https://beian.mps.gov.cn/#/query/webSearch?code=44030002018453'
+      )
+      expect(icp).toHaveAttribute('href', 'https://beian.miit.gov.cn/')
+      for (const link of [publicSecurity, icp]) {
+        expect(link).toHaveAttribute('target', '_blank')
+        expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+      }
+      const badge = publicSecurity.querySelector('img')
+      expect(badge).toHaveAttribute('src', '/beian-gongan.png')
+      expect(badge).toHaveAttribute('alt', '')
+      expect(badge).toHaveAttribute('width', '20')
+      expect(badge).toHaveAttribute('height', '20')
       expect(
         within(footer).queryByRole('link', { name: 'New API' })
       ).not.toBeInTheDocument()
@@ -119,7 +186,7 @@ describe('site footer', () => {
     expect(
       within(footer).getByRole('link', { name: 'Privacy Policy' })
     ).toHaveAttribute('href', '/privacy-policy')
-    expect(agreement.parentElement).toHaveClass('border-t', 'sm:border-l')
+    expect(agreement.parentElement).toHaveClass('flex-wrap')
     expect(footer).toHaveTextContent('Site copyright')
   })
 
