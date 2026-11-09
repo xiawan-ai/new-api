@@ -48,12 +48,6 @@ interface FooterProps {
 const FOOTER_LINK_CLASS =
   'text-background/80 hover:text-background text-sm underline-offset-4 transition-colors duration-200 hover:underline'
 
-const NEW_API_FOOTER_ATTRIBUTION_KEY = [
-  'footer',
-  'new' + 'api',
-  'projectAttributionSuffix',
-].join('.')
-
 function FooterLinkItem(props: { link: FooterLink }) {
   const { t } = useTranslation()
   const isExternal = props.link.href.startsWith('http')
@@ -79,10 +73,9 @@ function FooterLinkItem(props: { link: FooterLink }) {
   )
 }
 
-// Renders User Agreement / Privacy Policy links inline with the parent's
-// copyright row when either is configured in System Settings → Site. Emits
-// fragmented siblings so the parent flex container's gap controls spacing.
-function LegalLinks(props: { leadingSeparator?: boolean }) {
+// Render enabled legal links inline, or in a styled column when requested.
+// Keep the column absent when neither legal document is enabled.
+function LegalLinks(props: { leadingSeparator?: boolean; className?: string }) {
   const { t } = useTranslation()
   const { status } = useStatus()
   const items: { key: string; label: string; href: string }[] = []
@@ -103,53 +96,25 @@ function LegalLinks(props: { leadingSeparator?: boolean }) {
   if (items.length === 0) {
     return null
   }
-  return (
-    <>
-      {items.map((item, index) => (
-        <Fragment key={item.key}>
-          {(props.leadingSeparator || index > 0) && (
-            <span aria-hidden='true' className='opacity-50'>
-              ·
-            </span>
-          )}
-          <Link
-            to={item.href}
-            className='hover:text-background underline-offset-4 transition-colors duration-200 hover:underline'
-          >
-            {item.label}
-          </Link>
-        </Fragment>
-      ))}
-    </>
-  )
-}
-
-// inline=true returns just the inner span for composition in a parent flex
-// row. inline=false wraps in a centered/right-aligned div (default).
-function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
-  const { t } = useTranslation()
-  const content = (
-    <span className='text-background/65'>
-      &copy; {props.currentYear}{' '}
-      <a
-        href='https://github.com/QuantumNous/new-api'
-        target='_blank'
-        rel='noopener noreferrer'
-        className='text-background/90 hover:text-background font-medium underline-offset-4 transition-colors hover:underline'
+  const content = items.map((item, index) => (
+    <Fragment key={item.key}>
+      {(props.leadingSeparator || index > 0) && (
+        <span aria-hidden='true' className='opacity-50'>
+          ·
+        </span>
+      )}
+      <Link
+        to={item.href}
+        className='hover:text-background underline-offset-4 transition-colors duration-200 hover:underline'
       >
-        {t('New API')}
-      </a>
-      . {t(NEW_API_FOOTER_ATTRIBUTION_KEY)}
-    </span>
-  )
-  if (props.inline) {
-    return content
+        {item.label}
+      </Link>
+    </Fragment>
+  ))
+  if (props.className) {
+    return <div className={props.className}>{content}</div>
   }
-  return (
-    <div className='text-background/65 text-center text-xs sm:text-right'>
-      {content}
-    </div>
-  )
+  return content
 }
 
 export function Footer(props: FooterProps) {
@@ -239,10 +204,7 @@ export function Footer(props: FooterProps) {
               className='custom-footer text-background/80 min-w-0 text-center text-sm sm:text-left'
               dangerouslySetInnerHTML={{ __html: footerHtml }}
             />
-            <div className='border-background/15 text-background/65 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
-              <LegalLinks />
-              <ProjectAttribution currentYear={currentYear} inline />
-            </div>
+            <LegalLinks className='border-background/15 text-background/65 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5' />
           </div>
         </div>
       </footer>
@@ -279,14 +241,14 @@ export function Footer(props: FooterProps) {
           {/* Links columns */}
           {isDemoSiteMode && (
             <div className='grid grid-cols-3 gap-8 md:gap-16'>
-              {displayColumns.map((column, index) => (
-                <div key={index}>
+              {displayColumns.map((column) => (
+                <div key={column.title}>
                   <p className='text-background/65 mb-4 text-[12.5px] tracking-[1.5px] uppercase'>
                     {t(column.title)}
                   </p>
                   <ul className='space-y-2.5'>
-                    {column.links.map((link, linkIndex) => (
-                      <li key={linkIndex}>
+                    {column.links.map((link) => (
+                      <li key={`${link.text}:${link.href}`}>
                         <FooterLinkItem link={link} />
                       </li>
                     ))}
@@ -297,8 +259,7 @@ export function Footer(props: FooterProps) {
           )}
         </div>
 
-        {/* Copyright + optional legal links inline on the left, project
-            attribution on the right; wraps on narrow screens. */}
+        {/* Site copyright and optional legal links wrap on narrow screens. */}
         <div className='border-background/15 mt-14 flex flex-col items-center justify-between gap-x-3 gap-y-2 border-t pt-6 sm:flex-row'>
           <div className='text-background/65 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs sm:justify-start'>
             <span>
@@ -307,7 +268,6 @@ export function Footer(props: FooterProps) {
             </span>
             <LegalLinks leadingSeparator />
           </div>
-          <ProjectAttribution currentYear={currentYear} />
         </div>
       </div>
     </footer>
