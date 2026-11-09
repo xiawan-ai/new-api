@@ -104,9 +104,9 @@ For commercial licensing, please contact support@quantumnous.com
   --neutral: var(--finch-ink-muted);
   --neutral-foreground: var(--finch-cream-light);
 
-  /* Hairlines are ink on paper, never tinted with the brand color. */
-  --border: color-mix(in oklch, var(--finch-charcoal) 13%, var(--finch-cream));
-  --input: color-mix(in oklch, var(--finch-charcoal) 20%, var(--finch-cream));
+  /* sRGB keeps ink-on-paper hairlines warm-neutral instead of pink/purple. */
+  --border: color-mix(in srgb, var(--finch-charcoal) 13%, var(--finch-cream));
+  --input: color-mix(in srgb, var(--finch-charcoal) 20%, var(--finch-cream));
   --ring: var(--finch-forest);
 
   --chart-1: var(--finch-forest);
@@ -129,7 +129,7 @@ For commercial licensing, please contact support@quantumnous.com
   );
   --sidebar-accent-foreground: var(--finch-forest-dark);
   --sidebar-border: color-mix(
-    in oklch,
+    in srgb,
     var(--finch-charcoal) 12%,
     var(--finch-chrome)
   );
