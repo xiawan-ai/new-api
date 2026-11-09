@@ -39,6 +39,7 @@ interface FooterProps {
   name?: string
   columns?: FooterColumnProps[]
   copyright?: string
+  showFilings?: boolean
   className?: string
 }
 
@@ -280,26 +281,28 @@ export function Footer(props: FooterProps) {
             )}
             <LegalLinks className='flex flex-wrap items-center justify-center gap-x-3 gap-y-1 lg:justify-start' />
           </div>
-          <div className='flex max-w-full min-w-0 flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:shrink-0 lg:justify-end'>
-            {SITE_FILINGS.map((filing) => (
-              <FooterLinkItem
-                key={filing.href}
-                link={filing}
-                className='inline-flex max-w-full items-center gap-1.5 rounded-sm text-xs wrap-anywhere focus-visible:outline-2 focus-visible:outline-offset-4'
-              >
-                {filing.icon && (
-                  <img
-                    src={filing.icon}
-                    alt=''
-                    width={20}
-                    height={20}
-                    className='size-5 shrink-0'
-                  />
-                )}
-                {filing.text}
-              </FooterLinkItem>
-            ))}
-          </div>
+          {props.showFilings && (
+            <div className='flex max-w-full min-w-0 flex-wrap items-center justify-center gap-x-5 gap-y-2 lg:shrink-0 lg:justify-end'>
+              {SITE_FILINGS.map((filing) => (
+                <FooterLinkItem
+                  key={filing.href}
+                  link={filing}
+                  className='inline-flex max-w-full items-center gap-1.5 rounded-sm text-xs wrap-anywhere focus-visible:outline-2 focus-visible:outline-offset-4'
+                >
+                  {filing.icon && (
+                    <img
+                      src={filing.icon}
+                      alt=''
+                      width={20}
+                      height={20}
+                      className='size-5 shrink-0'
+                    />
+                  )}
+                  {filing.text}
+                </FooterLinkItem>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </footer>

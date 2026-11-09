@@ -59,6 +59,7 @@ async function renderFooter(
     footerHtml?: string
     legalEnabled?: boolean
     systemName?: string
+    showFilings?: boolean
   } = {}
 ) {
   useSystemConfigStore.setState({
@@ -75,7 +76,9 @@ async function renderFooter(
     user_agreement_enabled: options.legalEnabled ?? false,
     privacy_policy_enabled: options.legalEnabled ?? false,
   })
-  const route = createRootRoute({ component: () => <Footer /> })
+  const route = createRootRoute({
+    component: () => <Footer showFilings={options.showFilings} />,
+  })
   const router = createRouter({
     routeTree: route,
     history: createMemoryHistory({ initialEntries: ['/'] }),
@@ -90,6 +93,26 @@ async function renderFooter(
 }
 
 describe('site footer', () => {
+  it.each([
+    ['default', undefined],
+    ['custom', '<p>Finch Token · Site copyright</p>'],
+  ] as const)(
+    'hides both filing records and the badge by default while keeping copyright in the %s footer',
+    async (_mode, footerHtml) => {
+      const footer = await renderFooter({ footerHtml })
+
+      expect(footer).toHaveTextContent(
+        footerHtml
+          ? 'Finch Token · Site copyright'
+          : 'Finch Agent · 虾丸科技（深圳）有限公司'
+      )
+      expect(footer).not.toHaveTextContent('粤公网安备44030002018453号')
+      expect(footer).not.toHaveTextContent('粤ICP备2026152027号-1')
+      expect(footer.querySelector('a[href^="https://beian."]')).toBeNull()
+      expect(footer.querySelector('img[src="/beian-gongan.png"]')).toBeNull()
+    }
+  )
+
   it('shows the official company footer without framework placeholders when backend configuration is unavailable', async () => {
     const footer = await renderFooter({ systemName: 'New API' })
 
@@ -109,7 +132,7 @@ describe('site footer', () => {
   })
 
   it('keeps the compact footer free of a decorative divider and its extra padding', async () => {
-    const footer = await renderFooter()
+    const footer = await renderFooter({ showFilings: true })
     const filingGroup = within(footer).getByRole('link', {
       name: '粤ICP备2026152027号-1',
     }).parentElement
@@ -120,7 +143,7 @@ describe('site footer', () => {
   })
 
   it('wraps filing links below the copyright on narrow screens', async () => {
-    const footer = await renderFooter()
+    const footer = await renderFooter({ showFilings: true })
     const filingGroup = within(footer).getByRole('link', {
       name: '粤ICP备2026152027号-1',
     }).parentElement
@@ -132,9 +155,9 @@ describe('site footer', () => {
     ['default', undefined],
     ['custom', '<p>Finch Token · Site copyright</p>'],
   ] as const)(
-    'preserves site copyright without a project attribution in the %s footer',
+    'restores filings without a project attribution when explicitly enabled in the %s footer',
     async (_mode, footerHtml) => {
-      const footer = await renderFooter({ footerHtml })
+      const footer = await renderFooter({ footerHtml, showFilings: true })
 
       expect(footer).toHaveTextContent(
         footerHtml
