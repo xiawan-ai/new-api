@@ -36,18 +36,18 @@ export function CTA(props: CTAProps) {
   }
 
   return (
-    // The one dark section on the page: deep brand ground, paper-colored type.
-    <section className='bg-primary text-primary-foreground relative z-10'>
+    // Continue the paper/cream rhythm after the FAQ's cream background.
+    <section className='bg-paper text-foreground relative z-10 border-t'>
       <div className='finch-container finch-section flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between'>
         <AnimateInView className='max-w-2xl'>
           <h2 className='text-[clamp(2rem,4.5vw,3.25rem)] leading-[1.15] font-semibold tracking-[-0.02em]'>
             {t('Ready to make')}
             <br />
-            <em className='text-brand-soft not-italic'>
+            <em className='text-muted-foreground not-italic'>
               {t('your first request?')}
             </em>
           </h2>
-          <p className='text-primary-foreground/75 mt-5 max-w-xl text-[17px] leading-[1.75]'>
+          <p className='text-muted-foreground mt-5 max-w-xl text-[17px] leading-[1.75]'>
             {t(
               'Create an account, add credit and copy your key. It takes a few minutes.'
             )}
@@ -59,7 +59,7 @@ export function CTA(props: CTAProps) {
           className='flex flex-wrap items-center gap-x-6 gap-y-2'
         >
           <Button
-            className='group bg-background text-primary [a]:hover:bg-background/90 h-12 rounded-lg px-7 text-[15px] font-semibold'
+            className='group h-12 rounded-lg px-7 text-[15px] font-semibold'
             render={<Link to='/sign-up' />}
           >
             {t('Get your API key')}
@@ -67,7 +67,7 @@ export function CTA(props: CTAProps) {
           </Button>
           <Link
             to='/pricing'
-            className='text-primary-foreground/80 decoration-primary-foreground/40 hover:text-primary-foreground focus-visible:outline-primary-foreground inline-flex min-h-11 items-center rounded-sm text-[15px] underline underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2'
+            className='text-muted-foreground decoration-foreground/30 hover:text-foreground focus-visible:outline-foreground inline-flex min-h-11 items-center rounded-sm text-[15px] underline underline-offset-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2'
           >
             {t('See models and prices')}
           </Link>
